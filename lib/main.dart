@@ -33,8 +33,8 @@ class CancerShield extends StatelessWidget {
             final user = settings.arguments as UserModel;
             return MaterialPageRoute(
                 builder: (context) => HomeScreen(user: user));
-          case '/doctor_screen':
-            return MaterialPageRoute(builder: (context) => DoctorScreen());
+          // case '/doctor_screen':
+          //   return MaterialPageRoute(builder: (context) => DoctorScreen());
           case '/profile_screen':
             final user = settings.arguments as UserModel;
             return MaterialPageRoute(

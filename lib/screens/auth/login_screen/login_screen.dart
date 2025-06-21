@@ -152,17 +152,20 @@ class LoginScreen extends StatelessWidget {
           .showSnackBar(SnackBar(content: Text(error)));
     }, (success) async {
       print("herrrrrrrrrrrrrre");
-      await SharedPreferencesUtils.set('token',success?["token"]);
-  getUser(success?["userId"], context);
+      await SharedPreferencesUtils.set('token', success?["token"]);
+      getUser(success?["userId"], context, success?["token"]);
     });
   }
 
-  void getUser(int id, BuildContext context) async {
+  void getUser(int id, BuildContext context, String token) async {
     final api = HttpService.instance;
-    final response = await api.get("User/user/$id");
+    final response = await api.get("User/user/$id", headers: {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    });
     response.fold((error) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Failed to get user")));
+          .showSnackBar(SnackBar(content: Text(error)));
     }, (success) {
       final user = UserModel.fromMap(success!);
       ScaffoldMessenger.of(context)

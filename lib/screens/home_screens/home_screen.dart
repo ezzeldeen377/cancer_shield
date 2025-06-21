@@ -5,6 +5,7 @@ import 'package:cancer_shield/models/colon_model.dart';
 import 'package:cancer_shield/models/prediction_response.dart';
 import 'package:cancer_shield/models/skin_model.dart';
 import 'package:cancer_shield/models/user_model.dart';
+import 'package:cancer_shield/screens/doctor_screens/doctor_screen.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -23,15 +24,24 @@ class _HomeScreenState extends State<HomeScreen> {
   String? selectedRegion; // Holds the selected region
   XFile? selectedImage;
   final List<String> regions = [
-    'Downtown (West El-Balad)',
-    'El-Zamalek',
-    'Maadi',
-    'Helioplis',
-    'Nasr City',
-    'Dokki',
-    'Shubra',
-    'Helwan',
-    'Ain Shams'
+  'Nasr City',
+  'Downtown',
+  'Zamalek',
+  'Maadi',
+  'Heliopolis',
+  'Shubra',
+  'Helwan',
+  'Ain Shams',
+  'EL-Sahel Agouza',
+  'Mohandessin',
+  'Dokki',
+  'Giza(Pyramids)',
+  'Faisal',
+  '6th of October',
+  'Sheikh Zayed',
+  'Badrasheen',
+  'Kerdasa',
+  'Imbaba',
   ];
   int selectedIndex = -1;
   List<Map<String, String>> buttonData = [
@@ -478,9 +488,8 @@ class _HomeScreenState extends State<HomeScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).pushNamed(
-                    "/doctor_screen",
-                  );
+                  Navigator.of(context).push(
+MaterialPageRoute(builder:(context)=>DoctorScreen(location:selectedRegion??"" ,))                  );
                 },
                 style: ButtonStyle(
                     backgroundColor: WidgetStatePropertyAll(Color(0xff0ebe7f)),

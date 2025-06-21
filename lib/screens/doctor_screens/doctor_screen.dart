@@ -2,9 +2,11 @@ import 'package:cancer_shield/helpers/networking.dart';
 import 'package:cancer_shield/models/doctor_model.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DoctorScreen extends StatelessWidget {
-  const DoctorScreen({super.key});
+  const DoctorScreen({super.key, required this.location});
+  final String location;
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +81,7 @@ class DoctorScreen extends StatelessWidget {
                       fontFamily: "Montserrat"),
                 ),
                 Text(
-                  "Imbaba",
+                  location,
                   style: TextStyle(
                       fontSize: 18,
                       color: Colors.green,
@@ -100,12 +102,8 @@ class DoctorScreen extends StatelessWidget {
                       itemCount: snapshot.data!.length,
                       itemBuilder: (context, index) {
                         final doctor = snapshot.data![index];
-                        return _doctorsCard(
-                            doctor.name ?? "",
-                            doctor.experience ?? 0,
-                            doctor.phone ?? "",
-                            doctor.specialty ?? "",
-                            'assets/images/a.png');
+                        return _doctorsCard(doctor
+                         );
                       },
                     );
                   } else if (snapshot.hasError) {
@@ -127,11 +125,20 @@ class DoctorScreen extends StatelessWidget {
   Future<List<DoctorModel>> _getDoctors() async {
     final api = HttpService.instance;
     try {
-      final response = await api.get('Doctors/doctors');
+              var response ;
+
+      if (location.isEmpty) {
+         response = await api.get('Doctors');
+      } else {
+         response = await api.get('Doctors/filter?location=$location');
+      }
 
       return response.fold(
         (l) => [],
-        (r) => DoctorResponse.fromList(r?['data']).doctors ?? [],
+        (r) {
+          print("@@@@@@@@@@@@@@@@@@@@@@@@@$r");
+          return DoctorResponse.fromList(r?["data"]).doctors ;
+        },
       );
     } on Exception catch (e) {
       print("Error: $e");
@@ -141,7 +148,7 @@ class DoctorScreen extends StatelessWidget {
 }
 
 Widget _doctorsCard(
-    String name, int exp, String phone, String specialty, String image) {
+  DoctorModel doctor) {
   return Padding(
     padding: EdgeInsets.all(14),
     child: Container(
@@ -159,7 +166,7 @@ Widget _doctorsCard(
                 width: 70,
                 decoration: BoxDecoration(
                     color: Colors.grey, borderRadius: BorderRadius.circular(8)),
-                child: Image.asset(image),
+                child: Image.network(doctor.imagePath),
               ),
               SizedBox(
                 width: 16,
@@ -168,14 +175,14 @@ Widget _doctorsCard(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    name,
+                    doctor.name,
                     style: TextStyle(
                       fontFamily: "Montserrat",
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   Text(
-                    specialty,
+                    doctor.specialty,
                     style: TextStyle(
                       fontFamily: "Montserrat",
                       color: Colors.grey,
@@ -195,7 +202,7 @@ Widget _doctorsCard(
                         width: 4,
                       ),
                       Text(
-                        phone,
+                        doctor.phone,
                         style: TextStyle(
                           fontFamily: "Montserrat",
                           fontSize: 12,
@@ -211,6 +218,7 @@ Widget _doctorsCard(
             height: 20,
           ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,7 +231,7 @@ Widget _doctorsCard(
                     ),
                   ),
                   Text(
-                    "- $exp Years Experince",
+                    "- ${doctor.experience} Years Experince",
                     style: TextStyle(
                       fontFamily: "Montserrat",
                       fontSize: 12,
@@ -235,16 +243,17 @@ Widget _doctorsCard(
                 width: 20,
               ),
               SizedBox(
-                width: 150,
-                height: 45,
+             
                 child: ElevatedButton(
-                    onPressed: () {},
-                    style: ButtonStyle(
-                        backgroundColor:
-                            WidgetStatePropertyAll(Color(0xff0ebe7f)),
-                        shape: WidgetStatePropertyAll<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8)))),
+                    onPressed: () {
+                      launchUrlInBrowser(doctor.locationUrl);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 20,vertical: 10), // Set the desired padding here
+                        // Set the desired padding here,
+                        backgroundColor: Color(0xff0ebe7f),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -272,4 +281,12 @@ Widget _doctorsCard(
       ),
     ),
   );
+}
+Future<void> launchUrlInBrowser(String url) async {
+  final Uri uri = Uri.parse(url);
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  } else {
+    throw 'Could not launch $url';
+  }
 }
